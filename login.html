@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNS-UAM | Central Login</title>
+    <style>
+        /* --- SPLASH SCREEN ANIMATIONS --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            animation: fadeOutSplash 0.8s forwards;
+            animation-delay: 2.5s; 
+        }
+        .logo-container {
+            text-align: center; color: white;
+            animation: zoomInLogo 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        .logo-container svg { width: 100px; height: 100px; fill: white; margin-bottom: 15px; }
+        
+        @keyframes zoomInLogo {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+        @keyframes fadeOutSplash { 100% { opacity: 0; visibility: hidden; } }
+
+        /* --- MAIN UI STYLING --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6; /* Lighter background so the white box pops */
+            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;
+            
+            /* Animation applied here */
+            opacity: 0;
+            animation: fadeInForm 1s forwards;
+            animation-delay: 3s; 
+        }
+        @keyframes fadeInForm { 100% { opacity: 1; } }
+
+        h2 { color: #2c3e50; margin-bottom: 5px; }
+        p { color: #7f8c8d; font-size: 14px; margin-bottom: 25px; }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { font-weight: bold; color: #34495e; font-size: 13px; display: block; margin-bottom: 5px;}
+        input {
+            width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; 
+            box-sizing: border-box; font-size: 14px; transition: 0.3s border-color;
+        }
+        input:focus { border-color: #3498db; outline: none; }
+        
+        button {
+            width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px;
+            background-color: #2a5298; color: white; font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #1e3c72; }
+        .error-msg { color: #e74c3c; font-size: 13px; margin-top: 15px; display: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <div class="logo-container">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 3L1 9L4 10.63V17C4 18.66 7.58 20 12 20C16.42 20 20 18.66 20 17V10.63L23 9L12 3ZM12 18C8.69 18 6 16.88 6 15.5V11.72L12 15L18 11.72V15.5C18 16.88 15.31 18 12 18ZM21.9 9L12 4.4L2.1 9L12 13.6L21.9 9Z"/>
+        </svg>
+        <h1>Central Login</h1>
+        <p>University Management System</p>
+    </div>
+</div>
+
+<div class="login-box">
+    <h2>Secure Portal</h2>
+    <p>Sign in with your Roll Number or Faculty Username</p>
+    
+    <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="e.g., FA26-1-1 or ahmed.ali">
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••">
+    </div>
+    
+    <button onclick="attemptLogin()">Log In</button>
+    <div id="errorMsg" class="error-msg">Invalid Username or Password.</div>
+</div>
+
+<script>
+    async function attemptLogin() {
+        // Grab the exact values typed into the boxes
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorMsg');
+
+        // Hide error message on new attempt
+        errorDiv.style.display = 'none';
+
+        if (!user || !pass) {
+            errorDiv.innerText = "Please enter both Username and Password.";
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:5000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // THE FIX: Correctly mapping the variables to prevent the JS Crash!
+                body: JSON.stringify({ username: user, password: pass }) 
+            });
+            
+            const result = await response.json();
+
+            if (response.ok && result.status === 'success') {
+                // Save credentials to memory
+                localStorage.setItem('userId', result.userId); 
+                localStorage.setItem('userRole', result.role);
+
+                // Route the user based on their official database role
+                if (result.role === 'Faculty') {
+                    window.location.href = 'faculty.html';
+                } else if (result.role === 'Student') {
+                    window.location.href = 'student.html';
+                } else {
+                    errorDiv.innerText = "Role not recognized!";
+                    errorDiv.style.display = 'block';
+                }
+            } else {
+                // Show actual database rejection message
+                errorDiv.innerText = "❌ Invalid Username or Password.";
+                errorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            console.error("Login failed:", error);
+            errorDiv.innerText = "❌ Cannot connect to the server. Check api_server.py.";
+            errorDiv.style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>

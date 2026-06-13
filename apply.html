@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNS-UMS Admissions Portal</title>
+    <style>
+        /* --- SPLASH SCREEN ANIMATIONS --- */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOutSplash 0.8s forwards;
+            animation-delay: 2.5s; /* Stays on screen for 2.5 seconds */
+        }
+        .logo-container {
+            text-align: center;
+            color: white;
+            animation: zoomInLogo 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        .logo-container svg {
+            width: 100px; height: 100px; fill: white; margin-bottom: 15px;
+        }
+        
+        @keyframes zoomInLogo {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+        @keyframes fadeOutSplash {
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* --- MAIN UI STYLING --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .wizard-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            opacity: 0;
+            animation: fadeInForm 1s forwards;
+            animation-delay: 3s; /* Fades in after splash screen */
+        }
+
+        @keyframes fadeInForm {
+            100% { opacity: 1; }
+        }
+
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #7f8c8d; margin-bottom: 25px; font-size: 14px; }
+        
+        .row { display: flex; gap: 15px; }
+        .col { flex: 1; }
+        .form-group { margin-bottom: 15px; }
+        
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #34495e; font-size: 13px; }
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid #bdc3c7;
+            border-radius: 6px; box-sizing: border-box; font-size: 14px;
+            transition: 0.3s border-color;
+        }
+        input:focus, select:focus { border-color: #3498db; outline: none; }
+        
+        .btn-container { display: flex; justify-content: space-between; margin-top: 25px; }
+        button {
+            padding: 12px 24px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .btn-next { background-color: #2a5298; color: white; margin-left: auto; }
+        .btn-next:hover { background-color: #1e3c72; }
+        .btn-prev { background-color: #95a5a6; color: white; }
+        .btn-prev:hover { background-color: #7f8c8d; }
+        
+        .step { display: none; }
+        .step.active { display: block; animation: slideIn 0.4s ease-out; }
+        
+        @keyframes slideIn {
+            0% { transform: translateX(20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        .merit-display {
+            background: #e8f8f5; padding: 20px; border-radius: 8px;
+            text-align: center; margin-top: 20px; border: 1px solid #1abc9c;
+        }
+        .merit-score { font-size: 28px; font-weight: bold; color: #16a085; display: block; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <div class="logo-container">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 3L1 9L4 10.63V17C4 18.66 7.58 20 12 20C16.42 20 20 18.66 20 17V10.63L23 9L12 3ZM12 18C8.69 18 6 16.88 6 15.5V11.72L12 15L18 11.72V15.5C18 16.88 15.31 18 12 18ZM21.9 9L12 4.4L2.1 9L12 13.6L21.9 9Z"/>
+        </svg>
+        <h1>Admissions Portal</h1>
+        <p>University Management System</p>
+    </div>
+</div>
+
+<div class="wizard-container">
+    <h2>Apply for Admission</h2>
+    <p class="subtitle">Complete your profile to generate your merit score.</p>
+    
+    <div id="step1" class="step active">
+        <div class="row">
+            <div class="col form-group">
+                <label>First Name</label>
+                <input type="text" id="firstName" placeholder="First Name">
+            </div>
+            <div class="col form-group">
+                <label>Last Name</label>
+                <input type="text" id="lastName" placeholder="Last Name">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="student@example.com">
+            </div>
+            <div class="col form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" placeholder="0300-0000000">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Street Address</label>
+            <input type="text" id="address" placeholder="House No, Street, Area">
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label>City</label>
+                <input type="text" id="city" placeholder="e.g., Multan">
+            </div>
+            <div class="col form-group">
+                <label>District</label>
+                <input type="text" id="district" placeholder="e.g., Multan">
+            </div>
+        </div>
+        <div class="btn-container">
+            <button class="btn-next" onclick="nextStep(2)">Next: Academics &rarr;</button>
+        </div>
+    </div>
+
+    <div id="step2" class="step">
+        <div class="form-group">
+            <label>Select Examination Board</label>
+            <select id="board">
+                <option value="BISE Multan">BISE Multan</option>
+                <option value="BISE Lahore">BISE Lahore</option>
+                <option value="BISE DG Khan">BISE DG Khan</option>
+                <option value="FBISE Islamabad">FBISE Islamabad</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <h4 style="margin-bottom: 10px; color: #2c3e50;">Matriculation Details</h4>
+        <div class="row">
+            <div class="col form-group">
+                <label>Obtained Marks</label>
+                <input type="number" id="matObt" placeholder="e.g. 950" oninput="calculateMerit()">
+            </div>
+            <div class="col form-group">
+                <label>Total Marks</label>
+                <input type="number" id="matTot" value="1100" oninput="calculateMerit()">
+            </div>
+        </div>
+
+        <h4 style="margin-bottom: 10px; color: #2c3e50;">Intermediate / FSc Details</h4>
+        <div class="row">
+            <div class="col form-group">
+                <label>Obtained Marks</label>
+                <input type="number" id="intObt" placeholder="e.g. 850" oninput="calculateMerit()">
+            </div>
+            <div class="col form-group">
+                <label>Total Marks</label>
+                <input type="number" id="intTot" value="1100" oninput="calculateMerit()">
+            </div>
+        </div>
+        
+        <div class="merit-display">
+            Live Merit Aggregate
+            <span class="merit-score" id="meritScore">0.00%</span>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn-prev" onclick="prevStep(1)">&larr; Back</button>
+            <button class="btn-next" onclick="nextStep(3)">Next: Program &rarr;</button>
+        </div>
+    </div>
+
+    <div id="step3" class="step">
+        <div class="form-group">
+            <label>Select Target Program</label>
+            <select id="program">
+                <option value="1">Bachelor of Science in Information Technology (BSIT)</option>
+                <option value="2">Bachelor of Science in Computer Science (BSCS)</option>
+                <option value="3">Bachelor of Business Administration (BBA)</option>
+            </select>
+        </div>
+        
+        <div class="btn-container">
+            <button class="btn-prev" onclick="prevStep(2)">&larr; Back</button>
+            <button class="btn-next" style="background-color: #27ae60;" onclick="submitApplication()">Submit Application</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    // --- NEW: Dynamic Dropdown Logic ---
+    window.onload = async function() {
+        const programSelect = document.getElementById('program');
+        
+        try {
+            const response = await fetch('http://localhost:5000/get_programs');
+            const programs = await response.json();
+            
+            // Clear out the hardcoded options
+            programSelect.innerHTML = '';
+            
+            // Populate with live database data
+            if (programs.length > 0) {
+                programs.forEach(prog => {
+                    let option = document.createElement('option');
+                    option.value = prog.Program_ID;
+                    option.text = prog.Program_Name;
+                    programSelect.appendChild(option);
+                });
+            } else {
+                programSelect.innerHTML = '<option value="">No programs available</option>';
+            }
+        } catch (error) {
+            console.error("Error fetching programs:", error);
+            programSelect.innerHTML = '<option value="">Error loading programs</option>';
+        }
+    };
+
+    // --- WIZARD LOGIC ---
+    function nextStep(stepNumber) {
+        document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+        document.getElementById('step' + stepNumber).classList.add('active');
+    }
+
+    function prevStep(stepNumber) {
+        document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+        document.getElementById('step' + stepNumber).classList.add('active');
+    }
+
+    // --- MATH LOGIC ---
+    function calculateMerit() {
+        let mObt = parseFloat(document.getElementById('matObt').value) || 0;
+        let mTot = parseFloat(document.getElementById('matTot').value) || 1100;
+        let iObt = parseFloat(document.getElementById('intObt').value) || 0;
+        let iTot = parseFloat(document.getElementById('intTot').value) || 1100;
+        
+        if (mTot === 0) mTot = 1; 
+        if (iTot === 0) iTot = 1;
+
+        let matricPercentage = (mObt / mTot) * 30;
+        let interPercentage = (iObt / iTot) * 70;
+        let aggregate = matricPercentage + interPercentage;
+        
+        if(aggregate > 100) aggregate = 100;
+
+        document.getElementById('meritScore').innerText = aggregate.toFixed(2) + "%";
+    }
+
+   // --- SUBMISSION LOGIC WITH VALIDATION ---
+    async function submitApplication() {
+        // 1. Grab all the text values and remove accidental spaces using .trim()
+        const fName = document.getElementById('firstName').value.trim();
+        const lName = document.getElementById('lastName').value.trim();
+        const mail = document.getElementById('email').value.trim();
+        const phn = document.getElementById('phone').value.trim();
+        const addr = document.getElementById('address').value.trim();
+        const cty = document.getElementById('city').value.trim();
+        const dist = document.getElementById('district').value.trim();
+        const brd = document.getElementById('board').value.trim();
+        
+        // Grab the numbers
+        const matObt = parseFloat(document.getElementById('matObt').value) || 0;
+        const matTot = parseFloat(document.getElementById('matTot').value) || 0;
+        const intObt = parseFloat(document.getElementById('intObt').value) || 0;
+        const intTot = parseFloat(document.getElementById('intTot').value) || 0;
+        const progId = document.getElementById('program').value;
+
+        // 2. THE SECURITY CHECK: Are any of these empty or zero?
+        if (!fName || !lName || !mail || !phn || !addr || !cty || !dist || !brd) {
+            alert("⚠️ Missing Data: Please fill in all personal and academic text fields.");
+            return; // Stops the submission instantly!
+        }
+        
+        if (matTot === 0 || intTot === 0 || !progId) {
+            alert("⚠️ Missing Data: Please enter valid marks and select a Degree Program.");
+            return; // Stops the submission instantly!
+        }
+
+        // 3. If it passes the check, build the payload
+        const applicationData = {
+            firstName: fName,
+            lastName: lName,
+            email: mail,
+            phone: phn, 
+            address: addr, 
+            city: cty, 
+            district: dist, 
+            board: brd,
+            matricObt: matObt,
+            matricTot: matTot,
+            interObt: intObt,
+            interTot: intTot,
+            programId: parseInt(progId),
+            meritScore: parseFloat(document.getElementById('meritScore').innerText) || 0
+        };
+
+        // 4. Send to the API
+        try {
+            const response = await fetch('http://localhost:5000/submit_application', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(applicationData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("✅ Success! Your application has been sent to the university database.");
+                window.location.reload(); 
+            } else {
+                alert("❌ Error: " + result.message);
+            }
+        } catch (error) {
+            console.error("Connection error:", error);
+            alert("❌ Could not connect to the server. Is api_server.py running?");
+        }
+    }
+</script>
+
+</body>
+</html>

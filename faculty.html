@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Portal | MNS-UAM</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        
+        /* HEADER & PROFILE STYLING */
+        .header { background: #1e3c72; color: white; padding: 20px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;}
+        .profile-bar { background: white; padding: 15px 20px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 20px; border-top: 1px solid #ecf0f1; }
+        .profile-item { flex: 1; min-width: 200px; }
+        .profile-label { font-size: 11px; color: #7f8c8d; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px; display: block; }
+        .profile-value { font-size: 14px; color: #2c3e50; font-weight: 500; }
+        
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; }
+        
+        /* Control Panels */
+        .controls-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end; }
+        .form-group { flex: 1; }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box; }
+        
+        /* Data Grid */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ecf0f1; }
+        th { background-color: #f8f9f9; color: #34495e; font-size: 13px; }
+        td input { width: 60px; padding: 6px; text-align: center; border: 1px solid #bdc3c7; border-radius: 4px; }
+        
+        .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 12px; }
+        .badge-A { background: #d4edda; color: #155724; }
+        .badge-B { background: #d1ecf1; color: #0c5460; }
+        .badge-C { background: #fff3cd; color: #856404; }
+        .badge-F { background: #f8d7da; color: #721c24; }
+        .day-header { background: #2a5298; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;}
+        
+        .btn-primary { background-color: #2980b9; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-primary:hover { background-color: #1f6391; }
+        .btn-save { background-color: #27ae60; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; float: right; font-size: 16px; margin-top: 20px;}
+        .btn-save:hover { background-color: #2ecc71; }
+        .empty-state { text-align: center; color: #7f8c8d; padding: 30px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h2 id="welcomeText" style="margin: 0;">Welcome, Faculty</h2>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: #bdc3c7;">University Management System</p>
+        </div>
+        <div style="text-align: right;">
+            <a href="#" onclick="logout()" style="color: #ffcccc; font-size: 13px; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #ffcccc; border-radius: 4px;">Log Out</a>
+        </div>
+    </div>
+
+    <div class="profile-bar">
+        <div class="profile-item">
+            <span class="profile-label">Department</span>
+            <span class="profile-value" id="profDept">Loading...</span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">Academic Role</span>
+            <span class="profile-value" id="profRole">Loading...</span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">Official Email</span>
+            <span class="profile-value" id="profEmail">Loading...</span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">Contact Number</span>
+            <span class="profile-value" id="profPhone">Loading...</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>My Teaching Schedule</h3>
+        <table>
+            <thead>
+                <tr><th style="text-align: left;">Day</th><th style="text-align: left;">Course</th><th>Section</th><th>Time</th><th>Room</th></tr>
+            </thead>
+            <tbody id="timetableBody">
+                <tr><td colspan="5" class="empty-state">Loading schedule...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>1. Your Assigned Courses & Sections</h3>
+        <div class="controls-row">
+            <div class="form-group" style="flex: 2;">
+                <label>Select Course</label>
+                <select id="courseDropdown"><option value="">Loading assigned courses...</option></select>
+            </div>
+            <button class="btn-primary" onclick="fetchRoster()">📥 Load Students</button>
+        </div>
+    </div>
+
+    <div class="card" id="gradingTools" style="display: none; background: #fafbfc; border: 1px solid #e1e4e8;">
+        <h3 style="border-bottom: none; margin-bottom: 0;">2. Grade Settings (<span id="globalTotalDisplay">Max: 100</span>)</h3>
+        <div class="controls-row" style="margin-top: 15px;">
+            <div class="form-group"><label>Sessional</label><input type="number" id="maxSess" value="20" oninput="updateGrid()"></div>
+            <div class="form-group"><label>Midterm</label><input type="number" id="maxMid" value="30" oninput="updateGrid()"></div>
+            <div class="form-group"><label>Final</label><input type="number" id="maxFin" value="50" oninput="updateGrid()"></div>
+            <div class="form-group"><label>Practical</label><input type="number" id="maxPrac" value="0" oninput="updateGrid()"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>3. Student Roster</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align: left;">Roll Number</th>
+                    <th style="text-align: left;">Student Name</th>
+                    <th>Sessional</th>
+                    <th>Midterm</th>
+                    <th>Final</th>
+                    <th>Practical</th>
+                    <th>Total</th>
+                    <th>GPA</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody id="studentGrid">
+                <tr><td colspan="9" class="empty-state">Select an assigned course to begin grading.</td></tr>
+            </tbody>
+        </table>
+        <div style="overflow: hidden;">
+            <button class="btn-save" id="saveBtn" onclick="submitBatchGrades()" style="display: none;">💾 Secure Batch Save</button>
+        </div>
+    </div>
+
+<script>
+    let currentRoster = [];
+    let activeCourseId = null;
+
+    // --- BOOT SEQUENCE WITH SELF-HEALING LOGIC ---
+    window.onload = async function() {
+        const userId = localStorage.getItem('userId');
+        const userRole = localStorage.getItem('userRole');
+        
+        // SELF HEALING LOGIC: If the ghost string "undefined" is detected, wipe memory and start over!
+        if (!userId || userId === "undefined" || userId === "null" || isNaN(parseInt(userId))) {
+            localStorage.clear();
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (userRole !== 'Faculty') {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Fetch sequentially to prevent server lockups
+        try {
+            await fetchProfile(userId);
+            await fetchCourses(userId);
+            await fetchTimetable(userId);
+        } catch (error) { 
+            console.error("Boot sequence failed:", error); 
+            alert("Error connecting to the database. Please restart your Python API.");
+        }
+    };
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+
+    // --- FETCH PROFILE DATA ---
+    async function fetchProfile(userId) {
+        try {
+            const response = await fetch('http://localhost:5000/get_faculty_profile', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ facultyId: parseInt(userId) })
+            });
+            const result = await response.json();
+            
+            if (response.ok && result.profile) {
+                document.getElementById('welcomeText').innerText = `Welcome, Prof. ${result.profile.Last_Name}`;
+                document.getElementById('profDept').innerText = result.profile.Department_Name;
+                document.getElementById('profRole').innerText = result.profile.Role;
+                document.getElementById('profEmail').innerText = result.profile.Email;
+                document.getElementById('profPhone').innerText = result.profile.Phone_no;
+            }
+        } catch (error) { console.error("Profile fetch failed"); }
+    }
+
+    // --- FETCH TIMETABLE ---
+    async function fetchTimetable(userId) {
+        try {
+            const response = await fetch('http://localhost:5000/get_faculty_timetable', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ facultyId: parseInt(userId) })
+            });
+            const result = await response.json();
+            const tBody = document.getElementById('timetableBody');
+            tBody.innerHTML = ''; 
+            
+            if (result.timetable && result.timetable.length > 0) {
+                result.timetable.forEach(t => {
+                    tBody.innerHTML += `<tr>
+                        <td style="text-align: left;"><span class="day-header">${t.Day_Of_Week}</span></td>
+                        <td style="text-align: left; font-weight:bold; color:#2c3e50;">${t.Course_Name}</td>
+                        <td>Section ${t.Section_Name}</td>
+                        <td>${t.Start_Time} - ${t.End_Time}</td>
+                        <td>Room ${t.Room_ID}</td>
+                    </tr>`;
+                });
+            } else {
+                tBody.innerHTML = `<tr><td colspan="5" class="empty-state">No classes scheduled for you this semester.</td></tr>`;
+            }
+        } catch (error) { console.error("Timetable fetch failed"); }
+    }
+
+    // --- FETCH COURSES ---
+    async function fetchCourses(userId) {
+        try {
+            const response = await fetch('http://localhost:5000/get_faculty_courses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ facultyId: parseInt(userId) })
+            });
+            const result = await response.json();
+            
+            const dropdown = document.getElementById('courseDropdown');
+            dropdown.innerHTML = '';
+            
+            if (result.courses && result.courses.length > 0) {
+                result.courses.forEach(course => {
+                    let opt = document.createElement('option');
+                    opt.value = course.Course_ID;
+                    opt.text = `${course.Course_Code} - ${course.Course_Name} (Section ${course.Section_ID})`;
+                    dropdown.appendChild(opt);
+                });
+            } else {
+                dropdown.innerHTML = '<option value="">No courses assigned to you.</option>';
+            }
+        } catch (error) {
+            document.getElementById('courseDropdown').innerHTML = '<option value="">Error connecting to server</option>';
+        }
+    }
+
+    // --- FETCH ROSTER ---
+    async function fetchRoster() {
+        const cId = document.getElementById('courseDropdown').value;
+        if (!cId) { alert("No course selected."); return; }
+
+        try {
+            const response = await fetch('http://localhost:5000/get_my_students', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: parseInt(cId) })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                currentRoster = result.students;
+                activeCourseId = parseInt(cId);
+                
+                if (currentRoster.length === 0) {
+                    document.getElementById('studentGrid').innerHTML = '<tr><td colspan="9" class="empty-state">No students enrolled in this section.</td></tr>';
+                    document.getElementById('saveBtn').style.display = 'none';
+                    document.getElementById('gradingTools').style.display = 'none';
+                } else {
+                    buildGrid();
+                    document.getElementById('gradingTools').style.display = 'block';
+                    document.getElementById('saveBtn').style.display = 'block';
+                }
+            } else { alert("❌ " + result.message); }
+        } catch (error) { alert("❌ Could not connect to API server."); }
+    }
+
+    // --- BUILD GRID & MATH ---
+    function buildGrid() {
+        const tbody = document.getElementById('studentGrid');
+        tbody.innerHTML = '';
+        currentRoster.forEach((student, index) => {
+            const tr = document.createElement('tr');
+            
+            if (student.Grade_Letter !== null) {
+                // LOCKED ROW
+                tr.style.backgroundColor = '#fdfefe';
+                tr.innerHTML = `
+                    <td style="text-align: left; font-weight: bold; color: #7f8c8d;">${student.Roll_no}</td>
+                    <td style="text-align: left; color: #7f8c8d;">${student.First_Name} ${student.Last_Name}</td>
+                    <td><input type="number" value="${student.Sessional_Marks}" disabled style="background:#ecf0f1; border:none;"></td>
+                    <td><input type="number" value="${student.Mid_Marks}" disabled style="background:#ecf0f1; border:none;"></td>
+                    <td><input type="number" value="${student.Final_Marks}" disabled style="background:#ecf0f1; border:none;"></td>
+                    <td><input type="number" value="${student.Practical_Marks}" disabled style="background:#ecf0f1; border:none;"></td>
+                    <td style="font-weight: bold; color: #7f8c8d;">${student.Total_Obtained}</td>
+                    <td style="color: #7f8c8d;">${student.GPA_Points}</td>
+                    <td><span class="badge" style="background:#bdc3c7; color:white;">🔒 ${student.Grade_Letter}</span></td>
+                `;
+            } else {
+                // EDITABLE ROW
+                tr.innerHTML = `
+                    <td style="text-align: left; font-weight: bold; color: #2c3e50;">${student.Roll_no}</td>
+                    <td style="text-align: left;">${student.First_Name} ${student.Last_Name}</td>
+                    <td><input type="number" id="sess_${index}" value="0" oninput="calculateRow(${index})"></td>
+                    <td><input type="number" id="mid_${index}" value="0" oninput="calculateRow(${index})"></td>
+                    <td><input type="number" id="fin_${index}" value="0" oninput="calculateRow(${index})"></td>
+                    <td><input type="number" id="prac_${index}" value="0" oninput="calculateRow(${index})"></td>
+                    <td id="tot_${index}" style="font-weight: bold;">0</td>
+                    <td id="gpa_${index}">0.00</td>
+                    <td id="grd_${index}"><span class="badge badge-F">F</span></td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+        updateGrid();
+    }
+
+    let globalMax = 100;
+    function updateGrid() {
+        if (currentRoster.length === 0) return;
+        const mSess = parseFloat(document.getElementById('maxSess').value) || 0;
+        const mMid = parseFloat(document.getElementById('maxMid').value) || 0;
+        const mFin = parseFloat(document.getElementById('maxFin').value) || 0;
+        const mPrac = parseFloat(document.getElementById('maxPrac').value) || 0;
+        globalMax = mSess + mMid + mFin + mPrac;
+        document.getElementById('globalTotalDisplay').innerText = `Max: ${globalMax}`;
+        
+        currentRoster.forEach((student, i) => {
+            if (student.Grade_Letter === null) calculateRow(i);
+        });
+    }
+
+    function calculateRow(index) {
+        let sess = parseFloat(document.getElementById(`sess_${index}`).value) || 0;
+        let mid = parseFloat(document.getElementById(`mid_${index}`).value) || 0;
+        let fin = parseFloat(document.getElementById(`fin_${index}`).value) || 0;
+        let prac = parseFloat(document.getElementById(`prac_${index}`).value) || 0;
+        
+        let totalObtained = sess + mid + fin + prac;
+        document.getElementById(`tot_${index}`).innerText = totalObtained;
+
+        let percentage = globalMax > 0 ? (totalObtained / globalMax) * 100 : 0;
+        let gpa = 0.00; let letter = "F"; let badgeClass = "badge-F";
+
+        if (percentage >= 85) { gpa = 4.00; letter = "A"; badgeClass = "badge-A"; }
+        else if (percentage >= 80) { gpa = 3.70; letter = "A-"; badgeClass = "badge-A"; }
+        else if (percentage >= 75) { gpa = 3.30; letter = "B+"; badgeClass = "badge-B"; }
+        else if (percentage >= 71) { gpa = 3.00; letter = "B"; badgeClass = "badge-B"; }
+        else if (percentage >= 68) { gpa = 2.70; letter = "B-"; badgeClass = "badge-B"; }
+        else if (percentage >= 64) { gpa = 2.30; letter = "C+"; badgeClass = "badge-C"; }
+        else if (percentage >= 61) { gpa = 2.00; letter = "C"; badgeClass = "badge-C"; }
+        else if (percentage >= 50) { gpa = 1.00; letter = "D"; badgeClass = "badge-C"; }
+
+        document.getElementById(`gpa_${index}`).innerText = gpa.toFixed(2);
+        document.getElementById(`grd_${index}`).innerHTML = `<span class="badge ${badgeClass}">${letter}</span>`;
+    }
+
+    // --- SECURE BATCH SUBMIT ---
+    async function submitBatchGrades() {
+        let payload = [];
+        
+        currentRoster.forEach((student, index) => {
+            if (student.Grade_Letter === null) {
+                payload.push({
+                    rollNo: student.Roll_no,
+                    courseId: activeCourseId,
+                    semester: 1, 
+                    sessional: parseFloat(document.getElementById(`sess_${index}`).value) || 0,
+                    mid: parseFloat(document.getElementById(`mid_${index}`).value) || 0,
+                    final: parseFloat(document.getElementById(`fin_${index}`).value) || 0,
+                    practical: parseFloat(document.getElementById(`prac_${index}`).value) || 0,
+                    totalObtained: parseFloat(document.getElementById(`tot_${index}`).innerText) || 0,
+                    totalMax: globalMax,
+                    gpaPoints: parseFloat(document.getElementById(`gpa_${index}`).innerText) || 0,
+                    gradeLetter: document.getElementById(`grd_${index}`).innerText
+                });
+            }
+        });
+
+        if (payload.length === 0) {
+            alert("No new grades to submit. All students are locked.");
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:5000/submit_batch_grades', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ grades: payload })
+            });
+
+            if (response.ok) { 
+                alert("✅ Success! Grades locked in database."); 
+                fetchRoster(); // Reload the roster to show the new locks!
+            } else { alert("❌ Error saving grades."); }
+        } catch (error) { alert("❌ Could not connect to API server."); }
+    }
+</script>
+</body>
+</html>
