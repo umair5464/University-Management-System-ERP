@@ -21,4 +21,4 @@ A complete full-stack ERP system developed to manage university operations. It f
 * `login.html`, `faculty.html`, `student.html`, `apply.html` - The web interfaces.
 
 ---
-**Developed by:** Muhammad Umair
+**Developed by:** Muhammad Umair & Syed Shahmeer Ali Gillani 
